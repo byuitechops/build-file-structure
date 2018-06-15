@@ -1,0 +1,31 @@
+{
+  "name": "build-file-structure",
+  "version": "1.0.0",
+  "description": "Organize's a course's file structure.",
+  "main": "main.js",
+  "dependencies": {
+    "canvas-api-wrapper": "^3.2.1",
+    "canvas-wrapper": "github:byuitechops/canvas-wrapper",
+    "he": "^1.1.1"
+  },
+  "devDependencies": {
+    "async": "^2.6.0",
+    "child-development-kit": "github:byuitechops/child-development-kit",
+    "tap": "^10.7.3"
+  },
+  "scripts": {
+    "start": "node ./node_modules/child-development-kit/runChild.js",
+    "test": "tap ./node_modules/child-development-kit/runChild.js -T"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/byuitechops/build-file-structure.git"
+  },
+  "author": "Zachary Williams, Daniel Green",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/byuitechops/build-file-structure/issues"
+  },
+  "homepage": "https://github.com/byuitechops/build-file-structure#readme",
+  "childType": "postImport"
+}
