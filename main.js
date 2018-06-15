@@ -1,6 +1,5 @@
 const canvas = require('canvas-api-wrapper');
 const fileType = require('./fileType.js');
-const he = require('he');
 
 module.exports = (course, stepCallback) => {
 
@@ -48,27 +47,34 @@ module.exports = (course, stepCallback) => {
             // Move all files into each of the three main folders, then delete all other folders
             if (course.settings['Move files into three main folders'] && course.settings['Create three main folders']) {
                 canvasCourse.files.forEach(file => {
-                    var type = fileType(file.display_name);
-                    if (templateFiles.includes(file.display_name)) {
-                        type = 'template';
-                    }
+                    try {
+                        var type = fileType(file.display_name);
+                        if (templateFiles.includes(file.display_name)) {
+                            type = 'template';
+                        }
 
-                    if (mainThree[type]) {
-                        file.display_name = he.encode(file.display_name);
-                        file.on_duplicate = 'rename';
-                        file.parent_folder_id = '' + mainThree[type].id;
-                        course.log('Files Moved', {
-                            'Name': file.display_name,
-                            'New Location': type
-                        });
+                        if (mainThree[type]) {
+                            file.on_duplicate = 'rename';
+                            file.parent_folder_id = '' + mainThree[type].id;
+                            course.log('Files Moved', {
+                                'Name': file.display_name,
+                                'New Location': type
+                            });
+                        }
+                    } catch (e) {
+                        course.error(e);
                     }
                 });
 
-                // Update the files to relocate them
-                await canvasCourse.files.update();
+                try {
+                    // Update the files to relocate them
+                    await canvasCourse.files.update();
 
-                // Re-retrieve the folders, since we need updated file counts
-                await canvasCourse.folders.get();
+                    // Re-retrieve the folders, since we need updated file counts
+                    await canvasCourse.folders.get();
+                } catch (e) {
+                    course.error(e);
+                }
 
                 var folderNames = [
                     'documents',
@@ -95,30 +101,38 @@ module.exports = (course, stepCallback) => {
 
             // Create the archive folder, and move all unused files into it
             if (course.settings['Create Archive and archive unused files']) {
-                let archive = await canvasCourse.folders.create({name: 'archive', parent_folder_id: topFolder.id});
-                canvasCourse.files.forEach(file => {
-                    if (course.info.unusedFiles & course.info.unusedFiles.includes(file.display_name)) {
-                        file.display_name = he.encode(file.display_name);
-                        file.on_duplicate = 'rename';
-                        file.parent_folder_id = archive.id;
-                        course.log('Files Archived', {
-                            'Name': file.display_name,
-                            'New Location': type
-                        });
-                    }
-                });
-                await canvasCourse.files.update();
+                try {
+                    let archive = await canvasCourse.folders.create({name: 'archive', parent_folder_id: topFolder.id});
+                    canvasCourse.files.forEach(file => {
+                        if (course.info.unusedFiles & course.info.unusedFiles.includes(file.display_name)) {
+                            file.on_duplicate = 'rename';
+                            file.parent_folder_id = archive.id;
+                            course.log('Files Archived', {
+                                'Name': file.display_name,
+                                'New Location': type
+                            });
+                        }
+                    });
+                    await canvasCourse.files.update();
+                } catch (e) {
+                    course.error(e);
+                }
             }
 
             // Delete all unused files
             if (course.settings['Delete unused files']) {
                 for (var x = 0; x < canvasCourse.files.length; x++) {
-                    if (course.info.unusedFiles & course.info.unusedFiles.includes(canvasCourse.files[x].display_name)) {
-                        await canvasCourse.files[x].delete();
-                        course.log('Unused Files Deleted', {
-                            'Name': canvasCourse.files[x].display_name
-                        });
+                    try {
+                        if (course.info.unusedFiles & course.info.unusedFiles.includes(canvasCourse.files[x].display_name)) {
+                            await canvasCourse.files[x].delete();
+                            course.log('Unused Files Deleted', {
+                                'Name': canvasCourse.files[x].display_name
+                            });
+                        }
+                    } catch (e) {
+                        course.error(e);
                     }
+
                 }
             }
 
