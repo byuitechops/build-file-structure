@@ -19,29 +19,35 @@ module.exports = (course, stepCallback) => {
             // Create the three main folders: documents, media, template
             if (course.settings['Create three main folders']) {
 
-                let documents = canvasCourse.folders.find(folder => folder.name === 'documents');
-                let media = canvasCourse.folders.find(folder => folder.name === 'media');
-                let template = canvasCourse.folders.find(folder => folder.name === 'template');
+                try {
 
-                if (!documents) documents = await canvasCourse.folders.create({name: 'documents', parent_folder_id: topFolder.id});
-                if (!media) media = await canvasCourse.folders.create({name: 'media', parent_folder_id: topFolder.id});
-                if (!template) template = await canvasCourse.folders.create({name: 'template', parent_folder_id: topFolder.id});
+                    let documents = canvasCourse.folders.find(folder => folder.name === 'documents');
+                    let media = canvasCourse.folders.find(folder => folder.name === 'media');
+                    let template = canvasCourse.folders.find(folder => folder.name === 'template');
 
-                var mainThree = {
-                    documents,
-                    media,
-                    template
+                    if (!documents) documents = await canvasCourse.folders.create({name: 'documents', parent_folder_id: topFolder.id});
+                    if (!media) media = await canvasCourse.folders.create({name: 'media', parent_folder_id: topFolder.id});
+                    if (!template) template = await canvasCourse.folders.create({name: 'template', parent_folder_id: topFolder.id});
+
+                    var mainThree = {
+                        documents,
+                        media,
+                        template
+                    }
+
+                    course.log('Folders Created', {
+                        'Name': 'documents'
+                    });
+                    course.log('Folders Created', {
+                        'Name': 'media'
+                    });
+                    course.log('Folders Created', {
+                        'Name': 'template'
+                    });
+
+                } catch (e) {
+                    course.error(e);
                 }
-
-                course.log('Folders Created', {
-                    'Name': 'documents'
-                });
-                course.log('Folders Created', {
-                    'Name': 'media'
-                });
-                course.log('Folders Created', {
-                    'Name': 'template'
-                });
             }
 
             // Move all files into each of the three main folders, then delete all other folders
@@ -103,16 +109,21 @@ module.exports = (course, stepCallback) => {
             if (course.settings['Create Archive and archive unused files']) {
                 try {
                     let archive = await canvasCourse.folders.create({name: 'archive', parent_folder_id: topFolder.id});
-                    canvasCourse.files.forEach(file => {
-                        if (course.info.unusedFiles & course.info.unusedFiles.includes(file.display_name)) {
-                            file.on_duplicate = 'rename';
-                            file.parent_folder_id = archive.id;
-                            course.log('Files Archived', {
-                                'Name': file.display_name,
-                                'New Location': type
-                            });
-                        }
-                    });
+                } catch (e) {
+                    course.error(e);
+                }
+
+                canvasCourse.files.forEach(file => {
+                    if (course.info.unusedFiles & course.info.unusedFiles.includes(file.display_name)) {
+                        file.on_duplicate = 'rename';
+                        file.parent_folder_id = archive.id;
+                        course.log('Files Archived', {
+                            'Name': file.display_name,
+                            'New Location': type
+                        });
+                    }
+                });
+                try {
                     await canvasCourse.files.update();
                 } catch (e) {
                     course.error(e);
