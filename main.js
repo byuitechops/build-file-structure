@@ -126,9 +126,7 @@ module.exports = (course, stepCallback) => {
                 course.error(new Error('Option to archive unused files selected, but option to create archive folder was not.'));
             } else {
                 canvasCourse.files.forEach(file => {
-                    console.log('HERE!');
                     if (course.info.unusedFiles && course.info.unusedFiles.includes(file.display_name)) {
-                        console.log('MOVINGUNUSED');
                         file.on_duplicate = 'rename';
                         file.parent_folder_id = archive.id;
                         course.log('Files Archived', {
