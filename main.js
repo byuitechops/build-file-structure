@@ -98,28 +98,42 @@ module.exports = (course, stepCallback) => {
                                 'Name': canvasCourse.folders[x].name
                             });
                         } catch (e) {
-                            console.log(canvasCourse.folders[x]);
                             console.error(e);
                         }
                     }
                 }
             }
 
-            // Create the archive folder, and move all unused files into it
-            if (course.settings['Create Archive and archive unused files']) {
-                try {
-                    let archive = await canvasCourse.folders.create({name: 'archive', parent_folder_id: topFolder.id});
-                } catch (e) {
-                    course.error(e);
-                }
+            // Create the archive folder
+            // if (course.settings['Create Archive']) {
+            try {
+                var archive = canvasCourse.folders.find(folder => folder.name === 'archive');
+                if (!archive) archive = await canvasCourse.folders.create({name: 'archive', parent_folder_id: topFolder.id});
+                course.log('Folders Created', {
+                    'Name': 'archive'
+                });
+            } catch (e) {
+                course.error(e);
+            }
+            // }
 
+            // TESTING
+            course.info.unusedFiles = ['adobe flash reference.html', 'Book1.xlsx', 'Course Maintenance Log.html'];
+
+            // Move all unused files into archive
+            // if (course.settings['Archive unused files']) {
+            if (!archive) {
+                course.error(new Error('Option to archive unused files selected, but option to create archive folder was not.'));
+            } else {
                 canvasCourse.files.forEach(file => {
-                    if (course.info.unusedFiles & course.info.unusedFiles.includes(file.display_name)) {
+                    console.log('HERE!');
+                    if (course.info.unusedFiles && course.info.unusedFiles.includes(file.display_name)) {
+                        console.log('MOVINGUNUSED');
                         file.on_duplicate = 'rename';
                         file.parent_folder_id = archive.id;
                         course.log('Files Archived', {
                             'Name': file.display_name,
-                            'New Location': type
+                            'New Location': 'archive'
                         });
                     }
                 });
@@ -129,12 +143,13 @@ module.exports = (course, stepCallback) => {
                     course.error(e);
                 }
             }
+            // }
 
             // Delete all unused files
             if (course.settings['Delete unused files']) {
                 for (var x = 0; x < canvasCourse.files.length; x++) {
                     try {
-                        if (course.info.unusedFiles & course.info.unusedFiles.includes(canvasCourse.files[x].display_name)) {
+                        if (course.info.unusedFiles && course.info.unusedFiles.includes(canvasCourse.files[x].display_name)) {
                             await canvasCourse.files[x].delete();
                             course.log('Unused Files Deleted', {
                                 'Name': canvasCourse.files[x].display_name
