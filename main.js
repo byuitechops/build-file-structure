@@ -141,16 +141,20 @@ module.exports = (course, stepCallback) => {
 
             // Delete all unused files
             if (course.settings['Delete unused files']) {
-                for (var x = 0; x < canvasCourse.files.length; x++) {
-                    try {
-                        if (course.info.unusedFiles && course.info.unusedFiles.includes(canvasCourse.files[x].display_name)) {
-                            await canvasCourse.files[x].delete();
-                            course.log('Unused Files Deleted', {
-                                'Name': canvasCourse.files[x].display_name
-                            });
+                if (course.settings['Archive unused files']) {
+                    course.error(new Error('Option to archive unused files selected, as well as the option to delete them. Unused files will not be deleted.'));
+                } else {
+                    for (var x = 0; x < canvasCourse.files.length; x++) {
+                        try {
+                            if (course.info.unusedFiles && course.info.unusedFiles.includes(canvasCourse.files[x].display_name)) {
+                                await canvasCourse.files[x].delete();
+                                course.log('Unused Files Deleted', {
+                                    'Name': canvasCourse.files[x].display_name
+                                });
+                            }
+                        } catch (e) {
+                            course.error(e);
                         }
-                    } catch (e) {
-                        course.error(e);
                     }
                 }
             }
