@@ -105,45 +105,39 @@ module.exports = (course, stepCallback) => {
             }
 
             // Create the archive folder
-            // if (course.settings['Create Archive']) {
-            try {
-                var archive = canvasCourse.folders.find(folder => folder.name === 'archive');
-                if (!archive) archive = await canvasCourse.folders.create({name: 'archive', parent_folder_id: topFolder.id});
-                course.log('Folders Created', {
-                    'Name': 'archive'
-                });
-            } catch (e) {
-                course.error(e);
-            }
-            // }
-
-            // TESTING
-            course.info.unusedFiles = ['adobe flash reference.html', 'Book1.xlsx', 'Course Maintenance Log.html'];
-
-            // Move all unused files into archive
-            // if (course.settings['Archive unused files']) {
-            if (!archive) {
-                course.error(new Error('Option to archive unused files selected, but option to create archive folder was not.'));
-            } else {
-                canvasCourse.files.forEach(file => {
-                    console.log('HERE!');
-                    if (course.info.unusedFiles && course.info.unusedFiles.includes(file.display_name)) {
-                        console.log('MOVINGUNUSED');
-                        file.on_duplicate = 'rename';
-                        file.parent_folder_id = archive.id;
-                        course.log('Files Archived', {
-                            'Name': file.display_name,
-                            'New Location': 'archive'
-                        });
-                    }
-                });
+            if (course.settings['Create Archive']) {
                 try {
-                    await canvasCourse.files.update();
+                    var archive = canvasCourse.folders.find(folder => folder.name === 'archive');
+                    if (!archive) archive = await canvasCourse.folders.create({name: 'archive', parent_folder_id: topFolder.id});
+                    course.log('Folders Created', {
+                        'Name': 'archive'
+                    });
                 } catch (e) {
                     course.error(e);
                 }
             }
-            // }
+            // Move all unused files into archive
+            if (course.settings['Archive unused files']) {
+                if (!archive) {
+                    course.error(new Error('Option to archive unused files selected, but option to create archive folder was not.'));
+                } else {
+                    canvasCourse.files.forEach(file => {
+                        if (course.info.unusedFiles && course.info.unusedFiles.includes(file.display_name)) {
+                            file.on_duplicate = 'rename';
+                            file.parent_folder_id = archive.id;
+                            course.log('Files Archived', {
+                                'Name': file.display_name,
+                                'New Location': 'archive'
+                            });
+                        }
+                    });
+                    try {
+                        await canvasCourse.files.update();
+                    } catch (e) {
+                        course.error(e);
+                    }
+                }
+            }
 
             // Delete all unused files
             if (course.settings['Delete unused files']) {
@@ -158,7 +152,6 @@ module.exports = (course, stepCallback) => {
                     } catch (e) {
                         course.error(e);
                     }
-
                 }
             }
 
