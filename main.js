@@ -2,7 +2,6 @@ const canvas = require('canvas-api-wrapper');
 const fileType = require('./fileType.js');
 
 module.exports = (course, stepCallback) => {
-
     var templateFiles = [
         'dashboard.jpg',
         'homeImage.jpg',
@@ -18,9 +17,7 @@ module.exports = (course, stepCallback) => {
 
             // Create the three main folders: documents, media, template
             if (course.settings['Create three main folders']) {
-
                 try {
-
                     let documents = canvasCourse.folders.find(folder => folder.name === 'documents');
                     let media = canvasCourse.folders.find(folder => folder.name === 'media');
                     let template = canvasCourse.folders.find(folder => folder.name === 'template');
@@ -33,7 +30,7 @@ module.exports = (course, stepCallback) => {
                         documents,
                         media,
                         template
-                    }
+                    };
 
                     course.log('Folders Created', {
                         'Name': 'documents'
@@ -44,7 +41,6 @@ module.exports = (course, stepCallback) => {
                     course.log('Folders Created', {
                         'Name': 'template'
                     });
-
                 } catch (e) {
                     course.error(e);
                 }
@@ -90,7 +86,7 @@ module.exports = (course, stepCallback) => {
                     'course files'
                 ];
 
-                for (var x = 0; x < canvasCourse.folders.length; x++) {
+                for (let x = 0; x < canvasCourse.folders.length; x++) {
                     if (folderNames.every(name => canvasCourse.folders[x].name !== name) && canvasCourse.folders[x].files_count === 0) {
                         try {
                             await canvas.delete(`/api/v1/folders/${canvasCourse.folders[x].id}?force=true`);
@@ -98,7 +94,7 @@ module.exports = (course, stepCallback) => {
                                 'Name': canvasCourse.folders[x].name
                             });
                         } catch (e) {
-                            console.error(e);
+                            course.error(e);
                         }
                     }
                 }
@@ -144,7 +140,7 @@ module.exports = (course, stepCallback) => {
                 if (course.settings['Archive unused files']) {
                     course.error(new Error('Option to archive unused files selected, as well as the option to delete them. Unused files will not be deleted.'));
                 } else {
-                    for (var x = 0; x < canvasCourse.files.length; x++) {
+                    for (let x = 0; x < canvasCourse.files.length; x++) {
                         try {
                             if (course.info.unusedFiles && course.info.unusedFiles.includes(canvasCourse.files[x].display_name)) {
                                 await canvasCourse.files[x].delete();
@@ -168,6 +164,5 @@ module.exports = (course, stepCallback) => {
         .catch(e => {
             course.error(e);
             stepCallback(null, course);
-        })
-
+        });
 };
