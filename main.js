@@ -8,11 +8,6 @@ module.exports = (course, stepCallback) => {
         'courseBanner.jpg'
     ];
 
-    // TESTING remove for prod
-    course.settings['Move files into three main folders'] = true;
-    course.settings['Create three main folders'] = true;
-    course.settings['Delete unused files'] = true;
-
     (async () => {
         return new Promise(async (resolve, reject) => {
             var canvasCourse = canvas.getCourse(course.info.canvasOU);
