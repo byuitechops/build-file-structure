@@ -167,9 +167,9 @@ module.exports = (course, stepCallback) => {
             } else {
                for (let file in canvasCourse.files) {
                   try {
-                     if (course.info.unusedFiles && course.info.unusedFiles.includes(canvasCourse.files[x].display_name)) {
+                     if (course.info.unusedFiles && course.info.unusedFiles.includes(file.display_name)) {
                         let displayName = file.display_name;
-                        await canvasCourse.files[x].delete();
+                        await file.delete();
                         course.log('Unused Files Deleted', {
                            'Name': displayName
                         });
