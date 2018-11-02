@@ -8,6 +8,11 @@ module.exports = (course, stepCallback) => {
         'courseBanner.jpg'
     ];
 
+    // TESTING remove for prod
+    course.settings['Move files into three main folders'] = true;
+    course.settings['Create three main folders'] = true;
+    course.settings['Delete unused files'] = true;
+
     (async () => {
         return new Promise(async (resolve, reject) => {
             var canvasCourse = canvas.getCourse(course.info.canvasOU);
@@ -95,7 +100,9 @@ module.exports = (course, stepCallback) => {
                     'course files'
                 ];
 
-                for (let folder in canvasCourse.folders) {
+                /* delete unused folders */
+                for (let folder of canvasCourse.folders) {
+                    /* If the folder isn't included in folderNames & it's empty */
                     if (folderNames.every(name => folder.name !== name) && folder.files_count === 0) {
                         try {
                             await canvas.delete(`/api/v1/folders/${folder.id}?force=true`);
