@@ -28,6 +28,7 @@ If there are options that need to be set before the module runs, include them in
 |--------|--------|-------------|
 |settings['Create three main folders']| true/false | Determines whether the course has to create three main folders (it is where the child module should put images inside)|
 |settings['Move files into three main folders']| true/false | Determines whether the child module needs to move files into the three main folders |
+|settings['Create Archive']| true/false| Determines if there are unneeded files so it creates an Archive folder to move all of the unneeded files into.|
 
 ## Outputs
 
@@ -35,24 +36,27 @@ If your module adds anything to `course.info` or anywhere else on the course obj
 
 | Option | Type | Location |
 |--------|--------|-------------|
-|Lesson Folders| Array | course.info|
+|unusedFiles| Array | course.info|
 
 ## Process
 
 Describe in steps how the module accomplishes its goals.
 
-1. Does this thing
-2. Does that thing
-3. Does that other thing
+1. It checks to see if the course.settings['Create three main folders'] is set to be true. If it is, it'll create the folders (documents, media and template).
+2. It will also check to see if 1 is completed and the course.settings['Move files into three main folders'] is set to be true. If it is, it'll go through the process and move all of the files into those three folders created by step 1.
 
 ## Log Categories
 
 List the categories used in logging data in your module.
 
-- Discussions Created
-- Canvas Files Deleted
-- etc.
+- Folders Created
+- Folders Deleted
+- Files Moved
+- Files Archived
+- Unused Files Deleted
 
 ## Requirements
 
-These are the expectations for the child module. What does it need to do? What is the "customer" wanting from it? 
+*These are the expectations for the child module. What does it need to do? What is the "customer" wanting from it?*
+
+This child module goes through the files of the course during conversion. It then reorganizes the files into a new structure so every course has the same file structure. It will also remove unnecessary files and put them into a folder called archives. 
